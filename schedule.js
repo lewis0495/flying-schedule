@@ -1,6 +1,32 @@
 document.addEventListener("DOMContentLoaded", () => {
-    let flights = JSON.parse(localStorage.getItem("flights")) || [];
-    console.log(flights); // Log flight data to check if it's loaded correctly
+    let flights = [];
+    const binId = '67caea5ee41b4d34e4a26377';  // Your JSONBin bin ID
+    const apiKey = '$2a$10$MluIVSzwwW5t0XC74kvaAOx8yAwwozaFprIxopWvH7gsgnUJyilga';  // Your JSONBin API Key
+
+    // Fetch flight data from JSONBin
+    async function fetchFlights() {
+        try {
+            const response = await fetch(`https://api.jsonbin.io/v3/b/${binId}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Master-Key': apiKey
+                }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                flights = data.record || [];
+                console.log(flights); // Log the fetched flight data
+                renderFlights(); // Call renderFlights after fetching data
+            } else {
+                console.error("Failed to fetch flight data from JSONBin:", response.statusText);
+            }
+        } catch (error) {
+            console.error("Error fetching flight data:", error);
+        }
+    }
+
     let schedule = document.getElementById("schedule");
     let aircraftList = ["G-PJCD", "G-PJCM", "G-PJCN", "G-PJCS"];
 
@@ -18,8 +44,6 @@ document.addEventListener("DOMContentLoaded", () => {
     function renderFlights() {
         // Clear existing flights
         document.querySelectorAll(".flight").forEach(flight => flight.remove());
-
-        flights = JSON.parse(localStorage.getItem("flights")) || [];
 
         // Track used top positions for each aircraft
         let aircraftFlightPositions = {};
@@ -90,8 +114,8 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Initial render of flights
-    renderFlights();
+    // Initial fetch of flights and render them
+    fetchFlights();
 
     // Function to update the current time indicator
     function updateCurrentTimeIndicator() {
