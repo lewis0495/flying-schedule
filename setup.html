@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Flying Schedule - Setup</title>
@@ -349,31 +350,22 @@ function deleteAllFlights() {
         saveSetupFlights();
     }
 
-const API_URL = "https://cors-anywhere.herokuapp.com/https://api.jsonsilo.com/4b594df0-db31-409d-b06c-5199d3555083";
-const API_KEY = "sXUrXXcK0g6pYqPDkLqEOxGmHJrmswtZRGnvsPlVi5ERE";  // Replace with your actual API key
+    function saveFlights() {
+    const url = 'https://api.jsonsilo.com/4b594df0-db31-409d-b06c-5199d3555083';
+    const headers = {
+        'X-SILO-KEY': 'kqS6gzkd0EHh0HoCNx4TH90BsWXQY7RupIk3tJCfMW',  // Replace with your actual API key
+        'Content-Type': 'application/json'
+    };
 
-async function saveFlights() {
-    try {
-        const response = await fetch(API_URL, {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-                "x-api-key": API_KEY
-            },
-            body: JSON.stringify(flights)
+    axios.put(url, flights, { headers: headers })
+        .then(response => {
+            console.log('Flights successfully saved to JSONSilo:', response.data);
+            saveScheduleAnimation();  // Keep the animation
+        })
+        .catch(error => {
+            console.error('Failed to save flights to JSONSilo:', error);
+            alert('Failed to update flights on server. Please check the console for details.');
         });
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-
-        console.log("Flights updated successfully on JSON Silo");
-        saveScheduleAnimation(); // Keep the update animation
-
-    } catch (error) {
-        console.error("Failed to update flights on JSON Silo:", error);
-        alert("Error updating flights. Please check the console.");
-    }
 }
 
     function saveSetupFlights() {
