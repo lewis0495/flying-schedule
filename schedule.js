@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
     let flights = [];
     const binId = '67caea5ee41b4d34e4a26377';  // Your JSONBin bin ID
-    const apiKey = '$2a$10$MluIVSzwwW5t0XC74kvaAOx8yAwwozaFprIxopWvH7gsgnUJyilga';  // Your JSONBin API Key
+    const apiKey = '$2a$10$QIHX2qKPoMahglyME0MgAeTiXF3E.LlehNOcwiCpU1k4RhzM7snOm';  // Your JSONBin API Key
 
     // Fetch flight data from JSONBin
     async function fetchFlights() {
