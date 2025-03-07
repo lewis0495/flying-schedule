@@ -352,21 +352,34 @@ function deleteAllFlights() {
 
     function saveFlights() {
     const url = 'https://api.jsonsilo.com/4b594df0-db31-409d-b06c-5199d3555083';
+    const apiKey = 'kqS6gzkd0EHh0HoCNx4TH90BsWXQY7RupIk3tJCfMW';  // Make sure to replace this with your actual key
+
     const headers = {
-        'X-SILO-KEY': 'kqS6gzkd0EHh0HoCNx4TH90BsWXQY7RupIk3tJCfMW',  // Replace with your actual API key
+        'X-SILO-KEY': apiKey,
         'Content-Type': 'application/json'
     };
 
-    axios.put(url, flights, { headers: headers })
-        .then(response => {
-            console.log('Flights successfully saved to JSONSilo:', response.data);
-            saveScheduleAnimation();  // Keep the animation
-        })
-        .catch(error => {
-            console.error('Failed to save flights to JSONSilo:', error);
-            alert('Failed to update flights on server. Please check the console for details.');
-        });
+    fetch(url, {
+        method: 'PUT',  // <-- Make sure to use PUT or POST, not GET
+        headers: headers,
+        body: JSON.stringify(flights)  // This sends your updated flights data
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`Server responded with ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Flights updated successfully:', data);
+        saveScheduleAnimation();  // Your existing animation
+    })
+    .catch(error => {
+        console.error('Failed to update flights on JSON Silo:', error);
+        alert('Failed to update flights. Check console for more info.');
+    });
 }
+
 
     function saveSetupFlights() {
         localStorage.setItem("setupFlights", JSON.stringify(flights));
