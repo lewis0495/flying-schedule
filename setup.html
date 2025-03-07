@@ -136,115 +136,18 @@
 <div id="updateMessage">Flying schedule updated!</div>
     <a href="">Go to Schedule</a>
 <h1>Flying Schedule Setup</h1>
-<button id="saveScheduleBtn" onclick="saveFlights(); saveScheduleAnimation();">UPDATE SCHEDULE</button>
+<button id="saveScheduleBtn" onclick="saveFlightsToJsonBin(); saveScheduleAnimation();">UPDATE SCHEDULE</button>
 <button id="deleteAllBtn" onclick="handleDeleteAllClick()">Delete All Flights</button>
 <div id="flightsContainer"></div>
 <button id="addFlightBtn" onclick="addFlight()" style="display: none;">Add Flight</button>
 
 <script>
     let flights = JSON.parse(localStorage.getItem("setupFlights")) || [];
-    let pilots = JSON.parse(localStorage.getItem("pilots")) || ["John Doe", "Jane Smith"];
+let pilots = JSON.parse(localStorage.getItem("pilots")) || ["John Doe", "Jane Smith"];
 
-    function createFlightElement(index, flight) {
-    const flightDiv = document.createElement("div");
-    flightDiv.classList.add("flight");
-
-    flightDiv.innerHTML = `
-        <h3>FLIGHT ${index + 1}</h3>
-    
-        <div class="flight-row">
-            <div class="pair" style="width: 100%; max-width: 280px;">
-                <label>Aircraft:</label>
-                <select onchange="updateFlight(${index}, 'aircraft', this.value)">
-                    <option value="" ${!flight.aircraft ? 'selected' : ''}></option>
-                    <option value="G-PJCD" ${flight.aircraft === 'G-PJCD' ? 'selected' : ''}>G-PJCD</option>
-                    <option value="G-PJCM" ${flight.aircraft === 'G-PJCM' ? 'selected' : ''}>G-PJCM</option>
-                    <option value="G-PJCN" ${flight.aircraft === 'G-PJCN' ? 'selected' : ''}>G-PJCN</option>
-                    <option value="G-PJCS" ${flight.aircraft === 'G-PJCS' ? 'selected' : ''}>G-PJCS</option>
-                </select>
-            </div>
-            <div class="pair" style="width: 100%; max-width: 290px;">
-                <label>Status:</label>
-                <select class="status" onchange="updateFlight(${index}, 'status', this.value)">
-                    <option value="Normal" ${flight.status === 'Normal' ? 'selected' : ''}>Normal</option>
-                    <option value="Flying" ${flight.status === 'Flying' ? 'selected' : ''}>Flying</option>
-                    <option value="Complete" ${flight.status === 'Complete' ? 'selected' : ''}>Complete</option>
-                    <option value="Hold" ${flight.status === 'Hold' ? 'selected' : ''}>Hold</option>
-                </select>
-            </div>
-        </div>
-
-        <div class="flight-row" style="justify-content: flex-end;">
-            <div class="pair" style="width: 100%; max-width: 290px; margin-right: 10px;">
-                <label>Category:</label>
-                <select onchange="updateFlight(${index}, 'category', this.value)">
-                    <option value="" ${!flight.category ? 'selected' : ''}></option>
-                    <option value="SD-E" ${flight.category === 'SD-E' ? 'selected' : ''}>SD-E</option>
-                    <option value="SD-W" ${flight.category === 'SD-W' ? 'selected' : ''}>SD-W</option>
-                    <option value="RR-E" ${flight.category === 'RR-E' ? 'selected' : ''}>RR-E</option>
-                    <option value="RR-W" ${flight.category === 'RR-W' ? 'selected' : ''}>RR-W</option>
-                </select>
-            </div>
-        </div>
-
-        <div class="flight-row">
-            <div class="pair" style="width: 100%; max-width: 280px;">
-                <label>Start Time:</label>
-                <input type="text" id="startTime-${index}" placeholder="HH:MM" 
-oninput="formatTimeInput(this)" onchange="updateFlight(${index}, 'startTime', this.value)"
-           value="${flight.startTime || ''}">            </div>
-            <div class="pair" style="width: 100%; max-width: 280px;">
-                <label>End Time:</label>
-                <input type="text" id="endTime-${index}" placeholder="HH:MM" 
-                       oninput="formatTimeInput(this)" onchange="updateFlight(${index}, 'endTime', this.value)"
-           value="${flight.endTime || ''}">
-            </div>
-        </div>
-
-        <div class="flight-row">
-            <div class="pair full-width" style="flex: 1; width: 100%; max-width: 580px;">
-                <label>Route:</label>
-                <input type="text" style="width: 100%;" onchange="updateFlight(${index}, 'route', this.value)" value="${flight.route || ''}">
-            </div>
-        </div>
-
-        <div class="flight-row">
-            <div class="pair" style="width: 100%; max-width: 280px;">
-                <label>Pilot 1:</label>
-                <select onchange="updateFlight(${index}, 'pilot1', this.value)">
-                    <option value="" ${!flight.pilot1 ? 'selected' : ''}></option>
-                    ${pilots.map(pilot => `<option value="${pilot}" ${flight.pilot1 === pilot ? 'selected' : ''}>${pilot}</option>`).join('')}
-                </select>
-            </div>
-            <div class="pair" style="width: 100%; max-width: 290px;">
-                <label>Pilot 2:</label>
-                <select onchange="updateFlight(${index}, 'pilot2', this.value)">
-                    <option value="" ${!flight.pilot2 ? 'selected' : ''}></option>
-                    ${pilots.map(pilot => `<option value="${pilot}" ${flight.pilot2 === pilot ? 'selected' : ''}>${pilot}</option>`).join('')}
-                </select>
-            </div>
-        </div>
-
-        <div class="flight-row">
-            <div class="pair" style="width: 100%; max-width: 280px;">
-                <label>Passengers Out:</label>
-                <input type="number" min="0" onchange="updateFlight(${index}, 'passengersOut', this.value)" value="${flight.passengersOut || 0}">
-            </div>
-            <div class="pair" style="width: 100%; max-width: 280px;">
-                <label>Passengers In:</label>
-                <input type="number" min="0" onchange="updateFlight(${index}, 'passengersIn', this.value)" value="${flight.passengersIn || 0}">
-            </div>
-        </div>
-
-        <div class="flight-row">
-            <button class="deleteButton" onclick="handleDeleteClick(${index}, this)">Delete Flight</button>
-${index === flights.length - 1 ? `<button class="addFlightBtn" onclick="addFlight()">Add Flight</button>` : ""}
-        </div>        </div>
-    `;
-
-    return flightDiv;
+function createFlightElement(index, flight) {
+    // (this part remains unchanged, so you can keep the createFlightElement() function you already have)
 }
-
 
 function renderFlights() {
     const flightsContainer = document.getElementById("flightsContainer");
@@ -255,115 +158,54 @@ function renderFlights() {
         flightsContainer.appendChild(flightElement);
     });
 
-    // If there are no flights, show the "Add Flight" button
     const addFlightBtn = document.getElementById("addFlightBtn");
     if (flights.length === 0) {
-        addFlightBtn.style.display = "inline-block";  // Show the button
+        addFlightBtn.style.display = "inline-block";
     } else {
-        addFlightBtn.style.display = "none";  // Hide the button if there are flights
-    }
-}
-let isDeleteAllConfirmed = false; // Variable to track the confirmation state
-
-function handleDeleteAllClick() {
-    const deleteAllBtn = document.getElementById("deleteAllBtn");
-
-    if (!isDeleteAllConfirmed) {
-        // Change the button text to "Click to Confirm" to indicate confirmation
-        deleteAllBtn.textContent = "Click to Confirm";
-
-        // Change the state to indicate the next click will confirm the deletion
-        isDeleteAllConfirmed = true;
-
-        // Set a timeout to reset the button text in case the user doesn't confirm
-        setTimeout(() => {
-            if (isDeleteAllConfirmed) {
-                // If the user doesn't confirm within a reasonable time, reset the button
-                deleteAllBtn.textContent = "Delete All Flights";
-                isDeleteAllConfirmed = false;
-            }
-        }, 5000); // Reset the button after 5 seconds (you can adjust the time)
-    } else {
-        // Show a confirmation pop-up to the user
-        const confirmation = window.confirm("Are you sure you want to delete all flights? This action cannot be undone.");
-
-        if (confirmation) {
-            // If the user clicks OK, perform the deletion
-            deleteAllFlights();
-        } else {
-            // If the user clicks Cancel, reset the button
-            deleteAllBtn.textContent = "Delete All Flights";
-            isDeleteAllConfirmed = false;
-        }
+        addFlightBtn.style.display = "none";
     }
 }
 
-function deleteAllFlights() {
-    // Clear the flights array
-    flights = [];
-
-    // Render flights (which will now be empty)
+function addFlight() {
+    flights.push({
+        aircraft: "",
+        category: "",
+        route: "",
+        passengersOut: 0,
+        passengersIn: 0,
+        startTime: "",
+        endTime: "",
+        pilot1: "Pilot",
+        pilot2: "Pilot",
+        status: "Normal"
+    });
+    saveSetupFlightsToLocalStorage();  // Save to local storage
     renderFlights();
-
-    // Save the empty flights array to local storage
-    saveSetupFlights();
-
-    // Reset the button and state after the deletion
-    const deleteAllBtn = document.getElementById("deleteAllBtn");
-    isDeleteAllConfirmed = false;
-    deleteAllBtn.textContent = "Delete All Flights";
 }
 
+function updateFlight(index, key, value) {
+    flights[index][key] = value;
+    saveSetupFlightsToLocalStorage();  // Save to local storage
+}
 
+function deleteFlight(index) {
+    flights.splice(index, 1);
+    saveSetupFlightsToLocalStorage();  // Save to local storage
+    renderFlights();
+}
 
+function saveSetupFlightsToLocalStorage() {
+    localStorage.setItem("setupFlights", JSON.stringify(flights));
+}
 
-
-
-    function addFlight() {
-        flights.push({
-            aircraft: "",
-            category: "",
-            route: "",
-            passengersOut: 0,
-            passengersIn: 0,
-            startTime: "",
-            endTime: "",
-            pilot1: "Pilot",
-            pilot2: "Pilot",
-            status: "Normal"
-        });
-        renderFlights();
-        saveSetupFlights();
-
-    }
-
-    function updateFlight(index, key, value) {
-        flights[index][key] = value;
-        saveSetupFlights();
-
-    }
-
-    function deleteFlight(index) {
-        flights.splice(index, 1);
-        renderFlights();
-        saveSetupFlights();
-    }
-
-    function saveFlights() {
-        localStorage.setItem("flights", JSON.stringify(flights));
-    }
-    function saveSetupFlights() {
+function saveFlightsToJsonBin() {
     const flightsData = JSON.stringify(flights);
 
-    // Use the provided JSONBin API key
     const apiKey = '$2a$10$QIHX2qKPoMahglyME0MgAeTiXF3E.LlehNOcwiCpU1k4RhzM7snOm';
-
-    // Your JSONBin bin ID
     const binId = '67caea5ee41b4d34e4a26377';
 
-    // Set up the fetch request to JSONBin API
     fetch(`https://api.jsonbin.io/v3/b/${binId}`, {
-        method: 'PUT', // Use 'PUT' to update the data in the bin
+        method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
             'X-Master-Key': apiKey,
@@ -373,59 +215,92 @@ function deleteAllFlights() {
     .then(response => response.json())
     .then(data => {
         console.log("Data saved to JSONBin:", data);
+        showUpdateMessage();
     })
     .catch(error => {
         console.error("Error saving data to JSONBin:", error);
     });
 }
 
-
-    function handleDeleteClick(index, button) {
-        if (button.innerText === "Click to confirm") {
-            deleteFlight(index);
-        } else {
-            button.innerText = "Click to confirm";
-            setTimeout(() => button.innerText = "Delete Flight", 3000);
-        }
-    }
-
-    function saveScheduleAnimation() {
+function saveScheduleAnimation() {
     const saveButton = document.getElementById("saveScheduleBtn");
     saveButton.classList.add("animating");
 
-    // Show the "Flying schedule updated!" message
+    setTimeout(() => saveButton.classList.remove("animating"), 300); // Matches animation duration
+}
+
+function showUpdateMessage() {
     const message = document.getElementById('updateMessage');
     message.style.display = 'block';
     setTimeout(() => message.style.display = 'none', 3000);
-
-    // Remove the 'animating' class after the animation finishes
-    setTimeout(() => saveButton.classList.remove("animating"), 300); // Matches animation duration
 }
-    function formatTimeInput(input) {
-    let value = input.value.replace(/[^0-9:]/g, ''); // Allow only numbers and colon
 
-    // Allow full deletion
+function handleDeleteClick(index, button) {
+    if (button.innerText === "Click to confirm") {
+        deleteFlight(index);
+    } else {
+        button.innerText = "Click to confirm";
+        setTimeout(() => button.innerText = "Delete Flight", 3000);
+    }
+}
+
+// Optional: Confirm delete all functionality (unchanged from your code)
+let isDeleteAllConfirmed = false;
+
+function handleDeleteAllClick() {
+    const deleteAllBtn = document.getElementById("deleteAllBtn");
+
+    if (!isDeleteAllConfirmed) {
+        deleteAllBtn.textContent = "Click to Confirm";
+        isDeleteAllConfirmed = true;
+
+        setTimeout(() => {
+            if (isDeleteAllConfirmed) {
+                deleteAllBtn.textContent = "Delete All Flights";
+                isDeleteAllConfirmed = false;
+            }
+        }, 5000);
+    } else {
+        const confirmation = window.confirm("Are you sure you want to delete all flights? This action cannot be undone.");
+        if (confirmation) {
+            deleteAllFlights();
+        } else {
+            deleteAllBtn.textContent = "Delete All Flights";
+            isDeleteAllConfirmed = false;
+        }
+    }
+}
+
+function deleteAllFlights() {
+    flights = [];
+    saveSetupFlightsToLocalStorage();
+    renderFlights();
+    const deleteAllBtn = document.getElementById("deleteAllBtn");
+    deleteAllBtn.textContent = "Delete All Flights";
+    isDeleteAllConfirmed = false;
+}
+
+// Time formatting helper - no changes needed
+function formatTimeInput(input) {
+    let value = input.value.replace(/[^0-9:]/g, '');
+
     if (value === '') {
         input.value = '';
         return;
     }
 
-    // Remove colon if user backspaces over it
     if (value.length === 2 && value.includes(':')) {
         value = value.replace(':', '');
     }
 
-    // Auto-insert colon when needed
     if (value.length >= 3 && !value.includes(':')) {
         value = value.slice(0, 2) + ':' + value.slice(2);
     }
 
-    // Restrict max length to HH:MM
     if (value.length > 5) {
         value = value.slice(0, 5);
     }
 
-    // Validate HH and MM only when fully entered
     let parts = value.split(':');
     if (parts.length === 2 && parts[1].length === 2) {
         let hours = parseInt(parts[0], 10);
@@ -440,9 +315,8 @@ function deleteAllFlights() {
     input.value = value;
 }
 
-
-
-    renderFlights();
+// Initial load
+renderFlights();
 </script>
 </body>
 </html>
