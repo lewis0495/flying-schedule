@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pilot List</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .pilot-list { list-style: none; padding: 0; }
+        .pilot-item { margin: 5px 0; display: flex; align-items: center; }
+        .pilot-item input { margin-right: 10px; }
+        .edit-btn, .delete-btn { margin-left: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h2>Pilot List</h2>
+    <ul id="pilotList" class="pilot-list"></ul>
+    <input type="text" id="pilotInput" placeholder="Enter pilot name">
+    <button onclick="addPilot()">Add Pilot</button>
+
+    <script>
+        let pilots = JSON.parse(localStorage.getItem("pilots")) || ["John Doe", "Jane Smith"];
+        const pilotList = document.getElementById("pilotList");
+
+        function renderPilots() {
+            pilotList.innerHTML = "";
+            pilots.forEach((pilot, index) => {
+                let li = document.createElement("li");
+                li.classList.add("pilot-item");
+                li.innerHTML = `
+                    <input type="text" value="${pilot}" onchange="editPilot(${index}, this.value)">
+                    <button class="delete-btn" onclick="deletePilot(${index})">❌</button>
+                `;
+                pilotList.appendChild(li);
+            });
+            localStorage.setItem("pilots", JSON.stringify(pilots));
+        }
+
+        function addPilot() {
+            let input = document.getElementById("pilotInput");
+            if (input.value.trim() !== "") {
+                pilots.push(input.value.trim());
+                input.value = "";
+                renderPilots();
+            }
+        }
+
+        function editPilot(index, newName) {
+            pilots[index] = newName;
+            localStorage.setItem("pilots", JSON.stringify(pilots));
+        }
+
+        function deletePilot(index) {
+            pilots.splice(index, 1);
+            renderPilots();
+        }
+
+        renderPilots();
+    </script>
+</body>
+</html>

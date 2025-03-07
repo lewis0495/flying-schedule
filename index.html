@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flying Schedule</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            overflow-x: hidden;
+        }
+
+        .schedule-container {
+            width: 100%;
+            overflow-x: auto;
+            position: relative;
+            overflow-y: hidden; /* Disables vertical scrolling */
+    white-space: nowrap; /* Prevents content from wrapping */
+        }
+        
+
+
+        .schedule {
+            display: grid;
+            grid-template-columns: 150px repeat(48, 160px); /* Doubled width for time slots */
+            border: 1px solid #ccc;
+            min-width: calc(150px + 48 * 160px);
+            position: relative;
+        }
+
+        .time-slot {
+            text-align: center;
+            font-weight: bold;
+            padding: 5px;
+            border-bottom: 1px solid #ccc;
+            position: relative;
+            width: 160px;
+            left: -85px;
+            display: inline-block;
+        }
+
+        .time-slot::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: calc(50% + 80px);
+            width: 2px;
+            height: 12px;
+            background-color: rgb(140, 135, 135);
+        }
+
+        .time-slot::before {
+            content: "";
+            position: absolute;
+            top: calc(100% - 8px);
+            left: 50%;
+            width: 2px;
+            height: 8px;
+            background-color: rgb(140, 135, 135);
+            transform: translateX(-50%);
+        }
+
+        .aircraft-label {
+            background: #ddd;
+            min-height: 160px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            position: sticky;
+            left: 0;
+            z-index: 2;
+        }
+
+        .grid-cell {
+            border: 1px solid #ddd;
+            min-height: 160px;
+        }
+
+        .flight {
+            position: absolute;
+            background: blue;
+            color: white;
+            text-align: center;
+            border-radius: 5px;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 148px;
+        }
+
+        #currentTimeIndicator {
+            position: absolute;
+            top: 2px;
+            width: 2px;
+            background: red;
+            height: calc(100% - 2px);
+            z-index: 3;
+        }
+
+        /* Top-left blank corner cell with current time */
+        .blank-header {
+            position: sticky;
+            top: 0;
+            left: 0;
+            width: 130px;
+            height: 40px; /* Same as the height of time slots */
+            background-color: white;
+            z-index: 3;
+            border-bottom: 1px solid #ccc;
+            border-right: 1px solid #ccc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 24px;
+        }
+
+    </style>
+</head>
+<body>
+    <h1>Flying Schedule</h1>
+    <a href="setup.html">Setup Flights</a>
+
+    <div class="schedule-container" id="scheduleContainer">
+        <div id="currentTimeIndicator"></div>
+
+        <div class="schedule" id="schedule">
+            <!-- Top-left corner cell for current time -->
+            <div class="blank-header" id="currentTimeDisplay">--:--</div>
+
+            <script>
+                let aircraft = ["G-PJCD", "G-PJCM", "G-PJCN", "G-PJCS"];
+
+                // Generate time headers
+                for (let i = 0; i < 48; i++) {
+                    document.write(`<div class='time-slot hour-block'>${Math.floor(i/2)}:${i%2 ? '30' : '00'}</div>`);
+                }
+
+                // Generate aircraft rows
+                aircraft.forEach((ac, index) => {
+                    document.write(`<div class='aircraft-label'>${ac}</div>`);
+                    for (let i = 0; i < 48; i++) {
+                        document.write(`<div class='grid-cell'></div>`);
+                    }
+                });
+            </script>
+        </div>
+    </div>
+
+    <script>
+        function updateCurrentTimeIndicator() {
+            let now = new Date();
+            let currentHour = now.getHours();
+            let currentMinute = now.getMinutes().toString().padStart(2, '0');
+
+            // Update the time in the top-left blank header cell
+            let currentTimeDisplay = document.getElementById("currentTimeDisplay");
+            currentTimeDisplay.innerText = `${currentHour}:${currentMinute}`;
+
+            // Position the red time indicator
+            let currentHourDecimal = now.getHours() + now.getMinutes() / 60;
+            let columnWidth = 160;
+            let leftPos = (currentHourDecimal * 2) * columnWidth + 151;
+
+            let indicator = document.getElementById("currentTimeIndicator");
+            indicator.style.left = `${leftPos}px`;
+        }
+
+        // Run initially and update every minute
+        updateCurrentTimeIndicator();
+        setInterval(updateCurrentTimeIndicator, 60000);
+    </script>
+
+    <script src="schedule.js"></script>
+</body>
+</html>

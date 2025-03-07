@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flying Schedule - Setup</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        #flightsContainer {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* Ensures 3 columns */
+    gap: 30px; /* Increases spacing between boxes */
+    max-width: 1000px;
+    margin-top: 20px;
+    align-items: start; /* Ensures alignment to the top */
+}
+
+        .flight { 
+            width: 600px; 
+            border: 1px solid #ccc; 
+            padding: 10px; 
+            margin: 10px 0; 
+            background: #f9f9f9;
+        }
+
+        .flight-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 8px;
+        }
+
+        .flight-row .pair {
+            display: flex;
+            flex-direction: column;
+            width: 48%;
+        }
+
+        .full-width { width: 100%; }
+
+        label {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        input, select {
+            font-size: 16px;
+            padding: 6px;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        .addFlightBtn {
+    background-color: #4CAF50; /* Green for add flight */
+    color: white;
+}
+
+.addFlightBtn:hover {
+    background-color: #0a6d3d; /* Darker green on hover */
+}
+
+        .deleteButton {
+            background-color: #f44336;
+            padding: 10px 20px;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            color: white;
+
+        }
+
+        .deleteButton:hover { background-color: black; }
+
+        button {
+    padding: 10px 20px;   /* Add consistent padding */
+    font-size: 16px;       /* Ensure both buttons have the same font size */
+    border-radius: 5px;    /* Rounded corners */
+    cursor: pointer;      /* Pointer cursor on hover */
+    border: none;          /* Remove default border */
+    display: inline-block; /* Ensure buttons are inline but behave like block elements */
+    text-align: center;    /* Center the text inside the button */
+}
+
+        #saveScheduleBtn { background-color: #4CAF50; }
+        #addFlightBtn { background-color: #007BFF; }
+
+        /* Animation styles */
+        .animating {
+            animation: scaleAnimation 0.3s ease-out;
+        }
+
+       /* Animation styles */
+@keyframes scaleAnimation {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1); /* Slightly enlarge the button */
+    }
+    100% {
+        transform: scale(1); /* Return to original size */
+    }
+}
+        #updateMessage {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 15px;
+            background-color: #4CAF50;
+            color: white;
+            text-align: center;
+            font-size: 18px;
+            z-index: 9999;
+        }
+        #deleteAllBtn {
+    background-color: #f44336; /* Red color for delete */
+    color: white;
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    margin-bottom: 20px;
+}
+
+#deleteAllBtn:hover {
+    background-color: #000000; /* Darker red on hover */
+}
+
+    </style>
+</head>
+<body>
+<div id="updateMessage">Flying schedule updated!</div>
+<a href="/index.html">Go to Flying Schedule</a>
+<h1>Flying Schedule Setup</h1>
+<button id="saveScheduleBtn" onclick="saveFlights(); saveScheduleAnimation();">UPDATE SCHEDULE</button>
+<button id="deleteAllBtn" onclick="handleDeleteAllClick()">Delete All Flights</button>
+<div id="flightsContainer"></div>
+<button id="addFlightBtn" onclick="addFlight()" style="display: none;">Add Flight</button>
+
+<script>
+    let flights = JSON.parse(localStorage.getItem("setupFlights")) || [];
+    let pilots = JSON.parse(localStorage.getItem("pilots")) || ["John Doe", "Jane Smith"];
+
+    function createFlightElement(index, flight) {
+    const flightDiv = document.createElement("div");
+    flightDiv.classList.add("flight");
+
+    flightDiv.innerHTML = `
+        <h3>FLIGHT ${index + 1}</h3>
+    
+        <div class="flight-row">
+            <div class="pair" style="width: 100%; max-width: 280px;">
+                <label>Aircraft:</label>
+                <select onchange="updateFlight(${index}, 'aircraft', this.value)">
+                    <option value="" ${!flight.aircraft ? 'selected' : ''}></option>
+                    <option value="G-PJCD" ${flight.aircraft === 'G-PJCD' ? 'selected' : ''}>G-PJCD</option>
+                    <option value="G-PJCM" ${flight.aircraft === 'G-PJCM' ? 'selected' : ''}>G-PJCM</option>
+                    <option value="G-PJCN" ${flight.aircraft === 'G-PJCN' ? 'selected' : ''}>G-PJCN</option>
+                    <option value="G-PJCS" ${flight.aircraft === 'G-PJCS' ? 'selected' : ''}>G-PJCS</option>
+                </select>
+            </div>
+            <div class="pair" style="width: 100%; max-width: 290px;">
+                <label>Status:</label>
+                <select class="status" onchange="updateFlight(${index}, 'status', this.value)">
+                    <option value="Normal" ${flight.status === 'Normal' ? 'selected' : ''}>Normal</option>
+                    <option value="Flying" ${flight.status === 'Flying' ? 'selected' : ''}>Flying</option>
+                    <option value="Complete" ${flight.status === 'Complete' ? 'selected' : ''}>Complete</option>
+                    <option value="Hold" ${flight.status === 'Hold' ? 'selected' : ''}>Hold</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="flight-row" style="justify-content: flex-end;">
+            <div class="pair" style="width: 100%; max-width: 290px; margin-right: 10px;">
+                <label>Category:</label>
+                <select onchange="updateFlight(${index}, 'category', this.value)">
+                    <option value="" ${!flight.category ? 'selected' : ''}></option>
+                    <option value="SD-E" ${flight.category === 'SD-E' ? 'selected' : ''}>SD-E</option>
+                    <option value="SD-W" ${flight.category === 'SD-W' ? 'selected' : ''}>SD-W</option>
+                    <option value="RR-E" ${flight.category === 'RR-E' ? 'selected' : ''}>RR-E</option>
+                    <option value="RR-W" ${flight.category === 'RR-W' ? 'selected' : ''}>RR-W</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="flight-row">
+            <div class="pair" style="width: 100%; max-width: 280px;">
+                <label>Start Time:</label>
+                <input type="text" id="startTime-${index}" placeholder="HH:MM" 
+oninput="formatTimeInput(this)" onchange="updateFlight(${index}, 'startTime', this.value)"
+           value="${flight.startTime || ''}">            </div>
+            <div class="pair" style="width: 100%; max-width: 280px;">
+                <label>End Time:</label>
+                <input type="text" id="endTime-${index}" placeholder="HH:MM" 
+                       oninput="formatTimeInput(this)" onchange="updateFlight(${index}, 'endTime', this.value)"
+           value="${flight.endTime || ''}">
+            </div>
+        </div>
+
+        <div class="flight-row">
+            <div class="pair full-width" style="flex: 1; width: 100%; max-width: 580px;">
+                <label>Route:</label>
+                <input type="text" style="width: 100%;" onchange="updateFlight(${index}, 'route', this.value)" value="${flight.route || ''}">
+            </div>
+        </div>
+
+        <div class="flight-row">
+            <div class="pair" style="width: 100%; max-width: 280px;">
+                <label>Pilot 1:</label>
+                <select onchange="updateFlight(${index}, 'pilot1', this.value)">
+                    <option value="" ${!flight.pilot1 ? 'selected' : ''}></option>
+                    ${pilots.map(pilot => `<option value="${pilot}" ${flight.pilot1 === pilot ? 'selected' : ''}>${pilot}</option>`).join('')}
+                </select>
+            </div>
+            <div class="pair" style="width: 100%; max-width: 290px;">
+                <label>Pilot 2:</label>
+                <select onchange="updateFlight(${index}, 'pilot2', this.value)">
+                    <option value="" ${!flight.pilot2 ? 'selected' : ''}></option>
+                    ${pilots.map(pilot => `<option value="${pilot}" ${flight.pilot2 === pilot ? 'selected' : ''}>${pilot}</option>`).join('')}
+                </select>
+            </div>
+        </div>
+
+        <div class="flight-row">
+            <div class="pair" style="width: 100%; max-width: 280px;">
+                <label>Passengers Out:</label>
+                <input type="number" min="0" onchange="updateFlight(${index}, 'passengersOut', this.value)" value="${flight.passengersOut || 0}">
+            </div>
+            <div class="pair" style="width: 100%; max-width: 280px;">
+                <label>Passengers In:</label>
+                <input type="number" min="0" onchange="updateFlight(${index}, 'passengersIn', this.value)" value="${flight.passengersIn || 0}">
+            </div>
+        </div>
+
+        <div class="flight-row">
+            <button class="deleteButton" onclick="handleDeleteClick(${index}, this)">Delete Flight</button>
+${index === flights.length - 1 ? `<button class="addFlightBtn" onclick="addFlight()">Add Flight</button>` : ""}
+        </div>        </div>
+    `;
+
+    return flightDiv;
+}
+
+
+function renderFlights() {
+    const flightsContainer = document.getElementById("flightsContainer");
+    flightsContainer.innerHTML = ""; // Clear existing flights
+
+    flights.forEach((flight, index) => {
+        const flightElement = createFlightElement(index, flight);
+        flightsContainer.appendChild(flightElement);
+    });
+
+    // If there are no flights, show the "Add Flight" button
+    const addFlightBtn = document.getElementById("addFlightBtn");
+    if (flights.length === 0) {
+        addFlightBtn.style.display = "inline-block";  // Show the button
+    } else {
+        addFlightBtn.style.display = "none";  // Hide the button if there are flights
+    }
+}
+let isDeleteAllConfirmed = false; // Variable to track the confirmation state
+
+function handleDeleteAllClick() {
+    const deleteAllBtn = document.getElementById("deleteAllBtn");
+
+    if (!isDeleteAllConfirmed) {
+        // Change the button text to "Click to Confirm" to indicate confirmation
+        deleteAllBtn.textContent = "Click to Confirm";
+
+        // Change the state to indicate the next click will confirm the deletion
+        isDeleteAllConfirmed = true;
+
+        // Set a timeout to reset the button text in case the user doesn't confirm
+        setTimeout(() => {
+            if (isDeleteAllConfirmed) {
+                // If the user doesn't confirm within a reasonable time, reset the button
+                deleteAllBtn.textContent = "Delete All Flights";
+                isDeleteAllConfirmed = false;
+            }
+        }, 5000); // Reset the button after 5 seconds (you can adjust the time)
+    } else {
+        // Show a confirmation pop-up to the user
+        const confirmation = window.confirm("Are you sure you want to delete all flights? This action cannot be undone.");
+
+        if (confirmation) {
+            // If the user clicks OK, perform the deletion
+            deleteAllFlights();
+        } else {
+            // If the user clicks Cancel, reset the button
+            deleteAllBtn.textContent = "Delete All Flights";
+            isDeleteAllConfirmed = false;
+        }
+    }
+}
+
+function deleteAllFlights() {
+    // Clear the flights array
+    flights = [];
+
+    // Render flights (which will now be empty)
+    renderFlights();
+
+    // Save the empty flights array to local storage
+    saveSetupFlights();
+
+    // Reset the button and state after the deletion
+    const deleteAllBtn = document.getElementById("deleteAllBtn");
+    isDeleteAllConfirmed = false;
+    deleteAllBtn.textContent = "Delete All Flights";
+}
+
+
+
+
+
+
+    function addFlight() {
+        flights.push({
+            aircraft: "",
+            category: "",
+            route: "",
+            passengersOut: 0,
+            passengersIn: 0,
+            startTime: "",
+            endTime: "",
+            pilot1: "Pilot",
+            pilot2: "Pilot",
+            status: "Normal"
+        });
+        renderFlights();
+        saveSetupFlights();
+
+    }
+
+    function updateFlight(index, key, value) {
+        flights[index][key] = value;
+        saveSetupFlights();
+
+    }
+
+    function deleteFlight(index) {
+        flights.splice(index, 1);
+        renderFlights();
+        saveSetupFlights();
+    }
+
+    const API_URL = "https://api.jsonsilo.com/4b594df0-db31-409d-b06c-5199d3555083";
+const API_KEY = "sXUrXXcK0g6pYqPDkLqEOxGmHJrmswtZRGnvsPlVi5ERE";  // Replace with your actual API key
+
+async function saveFlights() {
+    try {
+        const response = await fetch(API_URL, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "x-api-key": API_KEY
+            },
+            body: JSON.stringify(flights)
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        console.log("Flights updated successfully on JSON Silo");
+        saveScheduleAnimation(); // Keep the update animation
+
+    } catch (error) {
+        console.error("Failed to update flights on JSON Silo:", error);
+        alert("Error updating flights. Please check the console.");
+    }
+}
+
+    function saveSetupFlights() {
+        localStorage.setItem("setupFlights", JSON.stringify(flights));
+    }
+
+    function handleDeleteClick(index, button) {
+        if (button.innerText === "Click to confirm") {
+            deleteFlight(index);
+        } else {
+            button.innerText = "Click to confirm";
+            setTimeout(() => button.innerText = "Delete Flight", 3000);
+        }
+    }
+
+    function saveScheduleAnimation() {
+    const saveButton = document.getElementById("saveScheduleBtn");
+    saveButton.classList.add("animating");
+
+    // Show the "Flying schedule updated!" message
+    const message = document.getElementById('updateMessage');
+    message.style.display = 'block';
+    setTimeout(() => message.style.display = 'none', 3000);
+
+    // Remove the 'animating' class after the animation finishes
+    setTimeout(() => saveButton.classList.remove("animating"), 300); // Matches animation duration
+}
+    function formatTimeInput(input) {
+    let value = input.value.replace(/[^0-9:]/g, ''); // Allow only numbers and colon
+
+    // Allow full deletion
+    if (value === '') {
+        input.value = '';
+        return;
+    }
+
+    // Remove colon if user backspaces over it
+    if (value.length === 2 && value.includes(':')) {
+        value = value.replace(':', '');
+    }
+
+    // Auto-insert colon when needed
+    if (value.length >= 3 && !value.includes(':')) {
+        value = value.slice(0, 2) + ':' + value.slice(2);
+    }
+
+    // Restrict max length to HH:MM
+    if (value.length > 5) {
+        value = value.slice(0, 5);
+    }
+
+    // Validate HH and MM only when fully entered
+    let parts = value.split(':');
+    if (parts.length === 2 && parts[1].length === 2) {
+        let hours = parseInt(parts[0], 10);
+        let minutes = parseInt(parts[1], 10);
+
+        if (hours > 23) hours = 23;
+        if (minutes > 59) minutes = 59;
+
+        value = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+    }
+
+    input.value = value;
+}
+
+
+
+    renderFlights();
+</script>
+</body>
+</html>
