@@ -134,18 +134,18 @@
 </head>
 <body>
 <div id="updateMessage">Flying schedule updated!</div>
-    <a href="">Go to Schedule</a>
+<a href="/index.html">Go to Flying Schedule</a>
 <h1>Flying Schedule Setup</h1>
-<button id="saveScheduleBtn" onclick="saveFlightsToJsonBin(); saveScheduleAnimation();">UPDATE SCHEDULE</button>
+<button id="saveScheduleBtn" onclick="saveFlights(); saveScheduleAnimation();">UPDATE SCHEDULE</button>
 <button id="deleteAllBtn" onclick="handleDeleteAllClick()">Delete All Flights</button>
 <div id="flightsContainer"></div>
 <button id="addFlightBtn" onclick="addFlight()" style="display: none;">Add Flight</button>
 
 <script>
     let flights = JSON.parse(localStorage.getItem("setupFlights")) || [];
-let pilots = JSON.parse(localStorage.getItem("pilots")) || ["John Doe", "Jane Smith"];
+    let pilots = JSON.parse(localStorage.getItem("pilots")) || ["John Doe", "Jane Smith"];
 
-function createFlightElement(index, flight) {
+    function createFlightElement(index, flight) {
     const flightDiv = document.createElement("div");
     flightDiv.classList.add("flight");
 
@@ -245,6 +245,7 @@ ${index === flights.length - 1 ? `<button class="addFlightBtn" onclick="addFligh
     return flightDiv;
 }
 
+
 function renderFlights() {
     const flightsContainer = document.getElementById("flightsContainer");
     flightsContainer.innerHTML = ""; // Clear existing flights
@@ -254,54 +255,119 @@ function renderFlights() {
         flightsContainer.appendChild(flightElement);
     });
 
+    // If there are no flights, show the "Add Flight" button
     const addFlightBtn = document.getElementById("addFlightBtn");
     if (flights.length === 0) {
-        addFlightBtn.style.display = "inline-block";
+        addFlightBtn.style.display = "inline-block";  // Show the button
     } else {
-        addFlightBtn.style.display = "none";
+        addFlightBtn.style.display = "none";  // Hide the button if there are flights
+    }
+}
+let isDeleteAllConfirmed = false; // Variable to track the confirmation state
+
+function handleDeleteAllClick() {
+    const deleteAllBtn = document.getElementById("deleteAllBtn");
+
+    if (!isDeleteAllConfirmed) {
+        // Change the button text to "Click to Confirm" to indicate confirmation
+        deleteAllBtn.textContent = "Click to Confirm";
+
+        // Change the state to indicate the next click will confirm the deletion
+        isDeleteAllConfirmed = true;
+
+        // Set a timeout to reset the button text in case the user doesn't confirm
+        setTimeout(() => {
+            if (isDeleteAllConfirmed) {
+                // If the user doesn't confirm within a reasonable time, reset the button
+                deleteAllBtn.textContent = "Delete All Flights";
+                isDeleteAllConfirmed = false;
+            }
+        }, 5000); // Reset the button after 5 seconds (you can adjust the time)
+    } else {
+        // Show a confirmation pop-up to the user
+        const confirmation = window.confirm("Are you sure you want to delete all flights? This action cannot be undone.");
+
+        if (confirmation) {
+            // If the user clicks OK, perform the deletion
+            deleteAllFlights();
+        } else {
+            // If the user clicks Cancel, reset the button
+            deleteAllBtn.textContent = "Delete All Flights";
+            isDeleteAllConfirmed = false;
+        }
     }
 }
 
-function addFlight() {
-    flights.push({
-        aircraft: "",
-        category: "",
-        route: "",
-        passengersOut: 0,
-        passengersIn: 0,
-        startTime: "",
-        endTime: "",
-        pilot1: "Pilot",
-        pilot2: "Pilot",
-        status: "Normal"
-    });
-    saveSetupFlightsToLocalStorage();  // Save to local storage
+function deleteAllFlights() {
+    // Clear the flights array
+    flights = [];
+
+    // Render flights (which will now be empty)
     renderFlights();
+
+    // Save the empty flights array to local storage
+    saveSetupFlights();
+
+    // Reset the button and state after the deletion
+    const deleteAllBtn = document.getElementById("deleteAllBtn");
+    isDeleteAllConfirmed = false;
+    deleteAllBtn.textContent = "Delete All Flights";
 }
 
-function updateFlight(index, key, value) {
-    flights[index][key] = value;
-    saveSetupFlightsToLocalStorage();  // Save to local storage
-}
+function saveSetupFlights() {
+        localStorage.setItem("setupFlights", JSON.stringify(flights));
+    }
 
-function deleteFlight(index) {
-    flights.splice(index, 1);
-    saveSetupFlightsToLocalStorage();  // Save to local storage
-    renderFlights();
-}
 
-function saveSetupFlightsToLocalStorage() {
-    localStorage.setItem("setupFlights", JSON.stringify(flights));
-}
 
-function saveFlightsToJsonBin() {
+
+
+    function addFlight() {
+        flights.push({
+            aircraft: "",
+            category: "",
+            route: "",
+            passengersOut: 0,
+            passengersIn: 0,
+            startTime: "",
+            endTime: "",
+            pilot1: "Pilot",
+            pilot2: "Pilot",
+            status: "Normal"
+        });
+        renderFlights();
+        saveSetupFlights();
+
+    }
+
+    function updateFlight(index, key, value) {
+        flights[index][key] = value;
+        saveSetupFlights();
+
+    }
+
+    function deleteFlight(index) {
+        flights.splice(index, 1);
+        renderFlights();
+        saveSetupFlights();
+    }
+
+        function saveSetupFlights() {
+        localStorage.setItem("setupFlights", JSON.stringify(flights));
+    }    
+    function saveFlights() {
     const flightsData = JSON.stringify(flights);
 
-    const apiKey = '$2a$10$QIHX2qKPoMahglyME0MgAeTiXF3E.LlehNOcwiCpU1k4RhzM7snOm';
+
+    // Use the provided JSONBin API key
+    const apiKey = '$2a$10$MluIVSzwwW5t0XC74kvaAOx8yAwwozaFprIxopWvH7gsgnUJyilga';
+
+    // Your JSONBin bin ID
     const binId = '67caea5ee41b4d34e4a26377';
 
+    // Set up the fetch request to JSONBin API
     fetch(`https://api.jsonbin.io/v3/b/${binId}`, {
-        method: 'PUT',
+        method: 'PUT', // Use 'PUT' to update the data in the bin
         headers: {
             'Content-Type': 'application/json',
             'X-Master-Key': apiKey,
@@ -311,92 +377,59 @@ function saveFlightsToJsonBin() {
     .then(response => response.json())
     .then(data => {
         console.log("Data saved to JSONBin:", data);
-        showUpdateMessage();
     })
     .catch(error => {
         console.error("Error saving data to JSONBin:", error);
     });
 }
 
-function saveScheduleAnimation() {
+
+    function handleDeleteClick(index, button) {
+        if (button.innerText === "Click to confirm") {
+            deleteFlight(index);
+        } else {
+            button.innerText = "Click to confirm";
+            setTimeout(() => button.innerText = "Delete Flight", 3000);
+        }
+    }
+
+    function saveScheduleAnimation() {
     const saveButton = document.getElementById("saveScheduleBtn");
     saveButton.classList.add("animating");
 
-    setTimeout(() => saveButton.classList.remove("animating"), 300); // Matches animation duration
-}
-
-function showUpdateMessage() {
+    // Show the "Flying schedule updated!" message
     const message = document.getElementById('updateMessage');
     message.style.display = 'block';
     setTimeout(() => message.style.display = 'none', 3000);
+
+    // Remove the 'animating' class after the animation finishes
+    setTimeout(() => saveButton.classList.remove("animating"), 300); // Matches animation duration
 }
+    function formatTimeInput(input) {
+    let value = input.value.replace(/[^0-9:]/g, ''); // Allow only numbers and colon
 
-function handleDeleteClick(index, button) {
-    if (button.innerText === "Click to confirm") {
-        deleteFlight(index);
-    } else {
-        button.innerText = "Click to confirm";
-        setTimeout(() => button.innerText = "Delete Flight", 3000);
-    }
-}
-
-// Optional: Confirm delete all functionality (unchanged from your code)
-let isDeleteAllConfirmed = false;
-
-function handleDeleteAllClick() {
-    const deleteAllBtn = document.getElementById("deleteAllBtn");
-
-    if (!isDeleteAllConfirmed) {
-        deleteAllBtn.textContent = "Click to Confirm";
-        isDeleteAllConfirmed = true;
-
-        setTimeout(() => {
-            if (isDeleteAllConfirmed) {
-                deleteAllBtn.textContent = "Delete All Flights";
-                isDeleteAllConfirmed = false;
-            }
-        }, 5000);
-    } else {
-        const confirmation = window.confirm("Are you sure you want to delete all flights? This action cannot be undone.");
-        if (confirmation) {
-            deleteAllFlights();
-        } else {
-            deleteAllBtn.textContent = "Delete All Flights";
-            isDeleteAllConfirmed = false;
-        }
-    }
-}
-
-function deleteAllFlights() {
-    flights = [];
-    saveSetupFlightsToLocalStorage();
-    renderFlights();
-    const deleteAllBtn = document.getElementById("deleteAllBtn");
-    deleteAllBtn.textContent = "Delete All Flights";
-    isDeleteAllConfirmed = false;
-}
-
-// Time formatting helper - no changes needed
-function formatTimeInput(input) {
-    let value = input.value.replace(/[^0-9:]/g, '');
-
+    // Allow full deletion
     if (value === '') {
         input.value = '';
         return;
     }
 
+    // Remove colon if user backspaces over it
     if (value.length === 2 && value.includes(':')) {
         value = value.replace(':', '');
     }
 
+    // Auto-insert colon when needed
     if (value.length >= 3 && !value.includes(':')) {
         value = value.slice(0, 2) + ':' + value.slice(2);
     }
 
+    // Restrict max length to HH:MM
     if (value.length > 5) {
         value = value.slice(0, 5);
     }
 
+    // Validate HH and MM only when fully entered
     let parts = value.split(':');
     if (parts.length === 2 && parts[1].length === 2) {
         let hours = parseInt(parts[0], 10);
@@ -411,8 +444,9 @@ function formatTimeInput(input) {
     input.value = value;
 }
 
-// Initial load
-renderFlights();
+
+
+    renderFlights();
 </script>
 </body>
 </html>
