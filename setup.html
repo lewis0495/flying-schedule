@@ -250,14 +250,9 @@ function renderFlights() {
     flightsContainer.innerHTML = ""; // Clear existing flights
 
     flights.forEach((flight, index) => {
-    const flightElement = createFlightElement(index, flight);
-    if (flightElement) {   // This prevents the appendChild error
+        const flightElement = createFlightElement(index, flight);
         flightsContainer.appendChild(flightElement);
-    } else {
-        console.error(`Skipping invalid flight element at index ${index}`);
-    }
-});
-
+    });
 
     const addFlightBtn = document.getElementById("addFlightBtn");
     if (flights.length === 0) {
