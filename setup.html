@@ -146,7 +146,103 @@
 let pilots = JSON.parse(localStorage.getItem("pilots")) || ["John Doe", "Jane Smith"];
 
 function createFlightElement(index, flight) {
-    // (this part remains unchanged, so you can keep the createFlightElement() function you already have)
+    const flightDiv = document.createElement("div");
+    flightDiv.classList.add("flight");
+
+    flightDiv.innerHTML = `
+        <h3>FLIGHT ${index + 1}</h3>
+    
+        <div class="flight-row">
+            <div class="pair" style="width: 100%; max-width: 280px;">
+                <label>Aircraft:</label>
+                <select onchange="updateFlight(${index}, 'aircraft', this.value)">
+                    <option value="" ${!flight.aircraft ? 'selected' : ''}></option>
+                    <option value="G-PJCD" ${flight.aircraft === 'G-PJCD' ? 'selected' : ''}>G-PJCD</option>
+                    <option value="G-PJCM" ${flight.aircraft === 'G-PJCM' ? 'selected' : ''}>G-PJCM</option>
+                    <option value="G-PJCN" ${flight.aircraft === 'G-PJCN' ? 'selected' : ''}>G-PJCN</option>
+                    <option value="G-PJCS" ${flight.aircraft === 'G-PJCS' ? 'selected' : ''}>G-PJCS</option>
+                </select>
+            </div>
+            <div class="pair" style="width: 100%; max-width: 290px;">
+                <label>Status:</label>
+                <select class="status" onchange="updateFlight(${index}, 'status', this.value)">
+                    <option value="Normal" ${flight.status === 'Normal' ? 'selected' : ''}>Normal</option>
+                    <option value="Flying" ${flight.status === 'Flying' ? 'selected' : ''}>Flying</option>
+                    <option value="Complete" ${flight.status === 'Complete' ? 'selected' : ''}>Complete</option>
+                    <option value="Hold" ${flight.status === 'Hold' ? 'selected' : ''}>Hold</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="flight-row" style="justify-content: flex-end;">
+            <div class="pair" style="width: 100%; max-width: 290px; margin-right: 10px;">
+                <label>Category:</label>
+                <select onchange="updateFlight(${index}, 'category', this.value)">
+                    <option value="" ${!flight.category ? 'selected' : ''}></option>
+                    <option value="SD-E" ${flight.category === 'SD-E' ? 'selected' : ''}>SD-E</option>
+                    <option value="SD-W" ${flight.category === 'SD-W' ? 'selected' : ''}>SD-W</option>
+                    <option value="RR-E" ${flight.category === 'RR-E' ? 'selected' : ''}>RR-E</option>
+                    <option value="RR-W" ${flight.category === 'RR-W' ? 'selected' : ''}>RR-W</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="flight-row">
+            <div class="pair" style="width: 100%; max-width: 280px;">
+                <label>Start Time:</label>
+                <input type="text" id="startTime-${index}" placeholder="HH:MM" 
+oninput="formatTimeInput(this)" onchange="updateFlight(${index}, 'startTime', this.value)"
+           value="${flight.startTime || ''}">            </div>
+            <div class="pair" style="width: 100%; max-width: 280px;">
+                <label>End Time:</label>
+                <input type="text" id="endTime-${index}" placeholder="HH:MM" 
+                       oninput="formatTimeInput(this)" onchange="updateFlight(${index}, 'endTime', this.value)"
+           value="${flight.endTime || ''}">
+            </div>
+        </div>
+
+        <div class="flight-row">
+            <div class="pair full-width" style="flex: 1; width: 100%; max-width: 580px;">
+                <label>Route:</label>
+                <input type="text" style="width: 100%;" onchange="updateFlight(${index}, 'route', this.value)" value="${flight.route || ''}">
+            </div>
+        </div>
+
+        <div class="flight-row">
+            <div class="pair" style="width: 100%; max-width: 280px;">
+                <label>Pilot 1:</label>
+                <select onchange="updateFlight(${index}, 'pilot1', this.value)">
+                    <option value="" ${!flight.pilot1 ? 'selected' : ''}></option>
+                    ${pilots.map(pilot => `<option value="${pilot}" ${flight.pilot1 === pilot ? 'selected' : ''}>${pilot}</option>`).join('')}
+                </select>
+            </div>
+            <div class="pair" style="width: 100%; max-width: 290px;">
+                <label>Pilot 2:</label>
+                <select onchange="updateFlight(${index}, 'pilot2', this.value)">
+                    <option value="" ${!flight.pilot2 ? 'selected' : ''}></option>
+                    ${pilots.map(pilot => `<option value="${pilot}" ${flight.pilot2 === pilot ? 'selected' : ''}>${pilot}</option>`).join('')}
+                </select>
+            </div>
+        </div>
+
+        <div class="flight-row">
+            <div class="pair" style="width: 100%; max-width: 280px;">
+                <label>Passengers Out:</label>
+                <input type="number" min="0" onchange="updateFlight(${index}, 'passengersOut', this.value)" value="${flight.passengersOut || 0}">
+            </div>
+            <div class="pair" style="width: 100%; max-width: 280px;">
+                <label>Passengers In:</label>
+                <input type="number" min="0" onchange="updateFlight(${index}, 'passengersIn', this.value)" value="${flight.passengersIn || 0}">
+            </div>
+        </div>
+
+        <div class="flight-row">
+            <button class="deleteButton" onclick="handleDeleteClick(${index}, this)">Delete Flight</button>
+${index === flights.length - 1 ? `<button class="addFlightBtn" onclick="addFlight()">Add Flight</button>` : ""}
+        </div>        </div>
+    `;
+
+    return flightDiv;
 }
 
 function renderFlights() {
