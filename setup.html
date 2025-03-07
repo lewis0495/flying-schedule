@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Flying Schedule - Setup</title>
@@ -351,39 +350,35 @@ function deleteAllFlights() {
     }
 
     function saveFlights() {
-    const url = 'https://api.jsonsilo.com/4b594df0-db31-409d-b06c-5199d3555083';
-    const apiKey = 'kqS6gzkd0EHh0HoCNx4TH90BsWXQY7RupIk3tJCfMW';  // Make sure to replace this with your actual key
+        localStorage.setItem("flights", JSON.stringify(flights));
+    }
+    function saveSetupFlights() {
+    const flightsData = JSON.stringify(flights);
 
-    const headers = {
-        'X-SILO-KEY': apiKey,
-        'Content-Type': 'application/json'
-    };
+    // Use the provided JSONBin API key
+    const apiKey = '$2a$10$iyezfVDlkMTRpcxPYnJpu.dKVhORnHmpf7t9TwOd1TZMQU08C63DG';
 
-    fetch(url, {
-        method: 'PUT',  // <-- Make sure to use PUT or POST, not GET
-        headers: headers,
-        body: JSON.stringify(flights)  // This sends your updated flights data
+    // Your JSONBin bin ID
+    const binId = '67caea5ee41b4d34e4a26377';
+
+    // Set up the fetch request to JSONBin API
+    fetch(`https://api.jsonbin.io/v3/b/${binId}`, {
+        method: 'PUT', // Use 'PUT' to update the data in the bin
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Master-Key': apiKey,
+        },
+        body: flightsData,
     })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error(`Server responded with ${response.status}`);
-        }
-        return response.json();
-    })
+    .then(response => response.json())
     .then(data => {
-        console.log('Flights updated successfully:', data);
-        saveScheduleAnimation();  // Your existing animation
+        console.log("Data saved to JSONBin:", data);
     })
     .catch(error => {
-        console.error('Failed to update flights on JSON Silo:', error);
-        alert('Failed to update flights. Check console for more info.');
+        console.error("Error saving data to JSONBin:", error);
     });
 }
 
-
-    function saveSetupFlights() {
-        localStorage.setItem("setupFlights", JSON.stringify(flights));
-    }
 
     function handleDeleteClick(index, button) {
         if (button.innerText === "Click to confirm") {
