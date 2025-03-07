@@ -355,7 +355,7 @@ const API_KEY = "sXUrXXcK0g6pYqPDkLqEOxGmHJrmswtZRGnvsPlVi5ERE";  // Replace wit
 async function saveFlights() {
     try {
         const response = await fetch(API_URL, {
-            method: "PUT",
+            method: "GET",
             headers: {
                 "Content-Type": "application/json",
                 "x-api-key": API_KEY
