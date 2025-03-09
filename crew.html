@@ -9,7 +9,7 @@
         .pilot-list { list-style: none; padding: 0; }
         .pilot-item { margin: 5px 0; display: flex; align-items: center; }
         .pilot-item input { margin-right: 10px; }
-        .edit-btn, .delete-btn { margin-left: 5px; cursor: pointer; }
+        .delete-btn { margin-left: 5px; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -19,43 +19,78 @@
     <button onclick="addPilot()">Add Pilot</button>
 
     <script>
-        let pilots = JSON.parse(localStorage.getItem("pilots")) || ["John Doe", "Jane Smith"];
-        const pilotList = document.getElementById("pilotList");
+        const apiUrl = "/api/pilots"; // Endpoint for storing pilot data
+        let pilots = [];
 
+        async function fetchPilots() {
+            try {
+                const response = await fetch('/api/pilots');
+                if (!response.ok) throw new Error('Network response was not ok');
+                
+                const data = await response.json();
+                pilots = data;  // Update pilots list
+                renderPilots();
+            } catch (error) {
+                console.error('Failed to load pilots:', error);
+            }
+        }
+
+        fetchPilots(); // Call on page load
+
+        // Save pilots to the server
+        async function savePilots() {
+            try {
+                await fetch(apiUrl, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(pilots)
+                });
+            } catch (error) {
+                console.error("Failed to save pilots:", error);
+            }
+        }
+
+        // Render pilot list
         function renderPilots() {
+            const pilotList = document.getElementById("pilotList");
             pilotList.innerHTML = "";
             pilots.forEach((pilot, index) => {
                 let li = document.createElement("li");
                 li.classList.add("pilot-item");
                 li.innerHTML = `
-                    <input type="text" value="${pilot}" onchange="editPilot(${index}, this.value)">
+                    <input type="text" value="${pilot}"
+                        onchange="editPilot(${index}, this.value)">
                     <button class="delete-btn" onclick="deletePilot(${index})">❌</button>
                 `;
                 pilotList.appendChild(li);
             });
-            localStorage.setItem("pilots", JSON.stringify(pilots));
         }
 
-        function addPilot() {
+        // Add a new pilot
+        async function addPilot() {
             let input = document.getElementById("pilotInput");
             if (input.value.trim() !== "") {
                 pilots.push(input.value.trim());
                 input.value = "";
                 renderPilots();
+                await savePilots();
             }
         }
 
-        function editPilot(index, newName) {
+        // Edit a pilot
+        async function editPilot(index, newName) {
             pilots[index] = newName;
-            localStorage.setItem("pilots", JSON.stringify(pilots));
+            await savePilots();
         }
 
-        function deletePilot(index) {
+        // Delete a pilot
+        async function deletePilot(index) {
             pilots.splice(index, 1);
             renderPilots();
+            await savePilots();
         }
 
-        renderPilots();
+        fetchPilots(); // Load pilots when the page loads
     </script>
 </body>
 </html>
