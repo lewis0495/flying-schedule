@@ -1,31 +1,28 @@
 document.addEventListener("DOMContentLoaded", () => {
     let flights = [];
-    const binId = '67caea5ee41b4d34e4a26377';  // Your JSONBin bin ID
-    const apiKey = '$2a$10$QIHX2qKPoMahglyME0MgAeTiXF3E.LlehNOcwiCpU1k4RhzM7snOm';  // Your JSONBin API Key
+    
 
-    // Fetch flight data from JSONBin
+    // Fetch flight data 
     async function fetchFlights() {
-        try {
-            const response = await fetch(`https://api.jsonbin.io/v3/b/${binId}`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Master-Key': apiKey
-                }
-            });
+    try {
+        const response = await fetch('/api/flights', {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' }
+        });
 
-            if (response.ok) {
-                const data = await response.json();
-                flights = data.record || [];
-                console.log(flights); // Log the fetched flight data
-                renderFlights(); // Call renderFlights after fetching data
-            } else {
-                console.error("Failed to fetch flight data from JSONBin:", response.statusText);
-            }
-        } catch (error) {
-            console.error("Error fetching flight data:", error);
+        if (response.ok) {
+            const data = await response.json();
+            flights = data || [];
+            console.log(flights); // Log the fetched flight data
+            renderFlights(); // Render after fetching data
+        } else {
+            console.error("Failed to fetch flight data:", 
+response.statusText);
         }
+    } catch (error) {
+        console.error("Error fetching flight data:", error);
     }
+}
 
     let schedule = document.getElementById("schedule");
     let aircraftList = ["G-PJCD", "G-PJCM", "G-PJCN", "G-PJCS"];
@@ -36,14 +33,18 @@ document.addEventListener("DOMContentLoaded", () => {
         return hours + minutes / 60;
     }
 
-    let columnWidth = document.querySelector(".grid-cell")?.offsetWidth || 160;
-    let rowHeight = document.querySelector(".grid-cell")?.offsetHeight || 160;
-    let aircraftLabelHeight = document.querySelector(".aircraft-label")?.offsetHeight || 40;
+    let columnWidth = document.querySelector(".grid-cell")?.offsetWidth || 
+160;
+    let rowHeight = document.querySelector(".grid-cell")?.offsetHeight || 
+160;
+    let aircraftLabelHeight = 
+document.querySelector(".aircraft-label")?.offsetHeight || 40;
 
     // Function to render flights
     function renderFlights() {
         // Clear existing flights
-        document.querySelectorAll(".flight").forEach(flight => flight.remove());
+        document.querySelectorAll(".flight").forEach(flight => 
+flight.remove());
 
         // Track used top positions for each aircraft
         let aircraftFlightPositions = {};
@@ -57,7 +58,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 // Log the calculated positions
                 let leftPos = (startHour * 2) * columnWidth;
                 let width = ((endHour - startHour) * 2) * columnWidth;
-                let topPos = Math.round(aircraftLabelHeight + (aircraftIndex * rowHeight) - 122);
+                let topPos = Math.round(aircraftLabelHeight + 
+(aircraftIndex * rowHeight) - 122);
 
                 // Adjust the first few rows slightly if necessary
                 if (aircraftIndex === 0) {
@@ -66,25 +68,32 @@ document.addEventListener("DOMContentLoaded", () => {
                     topPos -= -1;  // Fine-tune the second row
                 }
 
-                console.log(`Flight: ${flight.route}, leftPos: ${leftPos}, width: ${width}, topPos: ${topPos}`);
+                console.log(`Flight: ${flight.route}, leftPos: ${leftPos}, 
+width: ${width}, topPos: ${topPos}`);
 
                 // Create flight div
                 let flightDiv = document.createElement("div");
                 flightDiv.classList.add("flight");
-                flightDiv.style.left = `${leftPos + 150}px`;  // Adjust for aircraft column offset
+                flightDiv.style.left = `${leftPos + 150}px`;  // Adjust 
                 flightDiv.style.width = `${width}px`;
                 flightDiv.style.height = `${rowHeight - 11}px`;
                 flightDiv.style.top = `${Math.round(topPos)}px`;
 
                 // Add flight information
                 flightDiv.innerHTML = `
-                    <span class="passengers-out">${flight.passengersOut}</span>
-                    <span class="passengers-in">${flight.passengersIn}</span>
-                    <span class="flight-time start-time">${flight.startTime}</span>
-                    <span class="flight-time end-time">${flight.endTime}</span>
+                    <span 
+class="passengers-out">${flight.passengersOut}</span>
+                    <span 
+class="passengers-in">${flight.passengersIn}</span>
+                    <span class="flight-time 
+start-time">${flight.startTime}</span>
+                    <span class="flight-time 
+end-time">${flight.endTime}</span>
                     <span class="route">${flight.route}</span>
-                    <span class="pilots">${flight.pilot1} - ${flight.pilot2}</span>
-                    <span class="category">${flight.category ? flight.category : " "}</span>
+                    <span class="pilots">${flight.pilot1} - 
+${flight.pilot2}</span>
+                    <span class="category">${flight.category ? 
+flight.category : " "}</span>
                 `;
 
                 // Determine the color based on the flight status
@@ -105,7 +114,8 @@ document.addEventListener("DOMContentLoaded", () => {
                         break;
                 }
 
-                // Set the background color of the flight based on its status
+                // Set the background color of the flight based on its 
+
                 flightDiv.style.backgroundColor = statusColor;
 
                 // Append the flight to the schedule
@@ -134,8 +144,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let now = new Date();
     let currentHour = now.getHours() + now.getMinutes() / 60;
-    let scrollPos = (currentHour / 24) * (columnWidth * 48) - window.innerWidth / 6;
-    console.log(`scrollPos: ${scrollPos}`);  // Log the calculated scroll position
+    let scrollPos = (currentHour / 24) * (columnWidth * 48) - 
+window.innerWidth / 6;
+    console.log(`scrollPos: ${scrollPos}`);  // Log the calculated scroll 
+
     document.getElementById("scheduleContainer").scrollLeft = scrollPos;
 
     // Add dynamic CSS styles
@@ -210,17 +222,18 @@ document.addEventListener("DOMContentLoaded", () => {
     `;
     document.head.appendChild(style);
 
-    // Add event listener for storage changes to auto-update the flights when localStorage is modified
+    // Add event listener for storage changes to auto-update the flights 
     window.addEventListener("storage", function(e) {
         if (e.key === "flights") {
-            renderFlights(); // Re-render the flights if the flight data in localStorage changes
+            renderFlights(); // Re-render the flights if the flight data 
         }
     });
 
     // Horizontal scrolling with the mouse wheel
-    document.getElementById("scheduleContainer").addEventListener("wheel", function(e) {
+    document.getElementById("scheduleContainer").addEventListener("wheel", 
+function(e) {
         if (e.deltaY !== 0) {
-            this.scrollLeft += e.deltaY; // Adjust the speed by multiplying deltaY if needed
+            this.scrollLeft += e.deltaY; // Adjust the speed by 
         }
     }, { passive: true });
 });
