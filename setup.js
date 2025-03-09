@@ -5,7 +5,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let columnWidth = document.querySelector(".grid-cell").offsetWidth;
     let rowHeight = document.querySelector(".grid-cell").offsetHeight;
-    let aircraftLabelHeight = document.querySelector(".aircraft-label").offsetHeight;
+    let aircraftLabelHeight = 
+document.querySelector(".aircraft-label").offsetHeight;
 
     // Set up the schedule container to use flexbox and wrap items
     schedule.style.display = "flex";
@@ -13,7 +14,8 @@ document.addEventListener("DOMContentLoaded", () => {
     schedule.style.gap = "10px"; // Optional: Adjust gap between items
 
     // Remove any existing flight entries
-    document.querySelectorAll(".flight").forEach(flight => flight.remove());
+    document.querySelectorAll(".flight").forEach(flight => 
+flight.remove());
 
     flights.forEach(flight => {
         let aircraftIndex = aircraftList.indexOf(flight.aircraft);
@@ -22,18 +24,24 @@ document.addEventListener("DOMContentLoaded", () => {
             flightDiv.classList.add("flight");
 
             // Use flexbox for flight items
-            flightDiv.style.flexBasis = "calc(33.33% - 10px)"; // 3 items per row
-            flightDiv.style.position = "relative"; // Positioning to use absolute inside flight entry
+            flightDiv.style.flexBasis = "calc(33.33% - 10px)"; // 3 items 
+per row
+            flightDiv.style.position = "relative"; // Positioning to use 
+absolute inside flight entry
 
-            // Adjust positioning based on flight times (no need for absolute positioning anymore)
+            // Adjust positioning based on flight times (no need for 
+absolute positioning anymore)
             let leftPos = (flight.startHour * 2) * columnWidth;
-            let width = ((flight.endHour - flight.startHour) * 2) * columnWidth;
-            let topPos = aircraftLabelHeight + (aircraftIndex * rowHeight);
+            let width = ((flight.endHour - flight.startHour) * 2) * 
+columnWidth;
+            let topPos = aircraftLabelHeight + (aircraftIndex * 
+rowHeight);
 
             flightDiv.style.left = `${leftPos + 150}px`;
             flightDiv.style.width = `${width}px`;
             flightDiv.style.height = `${rowHeight - 11}px`;
-            flightDiv.style.top = `${Math.round(topPos - aircraftLabelHeight * 5 + 3 - aircraftIndex * 0.5)}px`;
+            flightDiv.style.top = `${Math.round(topPos - 
+aircraftLabelHeight * 5 + 3 - aircraftIndex * 0.5)}px`;
 
             // Function to format time (displaying in HH:MM format)
             function formatTime(hourDecimal) {
@@ -44,13 +52,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
             // Flight div content
             flightDiv.innerHTML = `
-                <span class="passengers-out">${flight.passengersOut}</span>
+                <span 
+class="passengers-out">${flight.passengersOut}</span>
                 <span class="passengers-in">${flight.passengersIn}</span>
                 <span class="flight-label">${flight.aircraft}</span>
-                <span class="flight-time start-time">${formatTime(flight.startHour)}</span>
-                <span class="flight-time end-time">${formatTime(flight.endHour)}</span>
+                <span class="flight-time 
+start-time">${formatTime(flight.startHour)}</span>
+                <span class="flight-time 
+end-time">${formatTime(flight.endHour)}</span>
                 <span class="route">${flight.route}</span>
-                <span class="pilots">${flight.pilot1}, ${flight.pilot2}</span>
+                <span class="pilots">${flight.pilot1}, 
+${flight.pilot2}</span>
                 <span class="category">${flight.category || "N/A"}</span>
             `;
 
@@ -80,7 +92,8 @@ document.addEventListener("DOMContentLoaded", () => {
     // Scroll the schedule container to the current time
     let now = new Date();
     let currentHour = now.getHours() + now.getMinutes() / 60;
-    let scrollPos = (currentHour / 24) * (columnWidth * 48) - window.innerWidth / 2;
+    let scrollPos = (currentHour / 24) * (columnWidth * 48) - 
+window.innerWidth / 2;
     document.getElementById("scheduleContainer").scrollLeft = scrollPos;
 
     // Add style to flight entries
