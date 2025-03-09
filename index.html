@@ -22,7 +22,8 @@
 
         .schedule {
             display: grid;
-            grid-template-columns: 150px repeat(48, 160px); /* Doubled width for time slots */
+            grid-template-columns: 150px repeat(48, 160px); /* Doubled 
+width for time slots */
             border: 1px solid #ccc;
             min-width: calc(150px + 48 * 160px);
             position: relative;
@@ -135,12 +136,14 @@
 
                 // Generate time headers
                 for (let i = 0; i < 48; i++) {
-                    document.write(`<div class='time-slot hour-block'>${Math.floor(i/2)}:${i%2 ? '30' : '00'}</div>`);
+                    document.write(`<div class='time-slot 
+hour-block'>${Math.floor(i/2)}:${i%2 ? '30' : '00'}</div>`);
                 }
 
                 // Generate aircraft rows
                 aircraft.forEach((ac, index) => {
-                    document.write(`<div class='aircraft-label'>${ac}</div>`);
+                    document.write(`<div 
+class='aircraft-label'>${ac}</div>`);
                     for (let i = 0; i < 48; i++) {
                         document.write(`<div class='grid-cell'></div>`);
                     }
@@ -153,18 +156,23 @@
         function updateCurrentTimeIndicator() {
             let now = new Date();
             let currentHour = now.getHours();
-            let currentMinute = now.getMinutes().toString().padStart(2, '0');
+            let currentMinute = now.getMinutes().toString().padStart(2, 
+'0');
 
             // Update the time in the top-left blank header cell
-            let currentTimeDisplay = document.getElementById("currentTimeDisplay");
-            currentTimeDisplay.innerText = `${currentHour}:${currentMinute}`;
+            let currentTimeDisplay = 
+document.getElementById("currentTimeDisplay");
+            currentTimeDisplay.innerText = 
+`${currentHour}:${currentMinute}`;
 
             // Position the red time indicator
-            let currentHourDecimal = now.getHours() + now.getMinutes() / 60;
+            let currentHourDecimal = now.getHours() + now.getMinutes() / 
+60;
             let columnWidth = 160;
             let leftPos = (currentHourDecimal * 2) * columnWidth + 151;
 
-            let indicator = document.getElementById("currentTimeIndicator");
+            let indicator = 
+document.getElementById("currentTimeIndicator");
             indicator.style.left = `${leftPos}px`;
         }
 
